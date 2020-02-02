@@ -150,12 +150,20 @@ trevorc2>exit
 
 ## Dockerfile
 Uses an alpine-based Dockerfile to deploy trevorC2, handy for quick deployment on cloud providers.  
-Example below:
+Examples below:
 
+On raspberry pi 1, or pi running ARMv6
 ```bash
 git clone https://github.com/trustedsec/trevorc2.git
 cd trevorc2
-# At this point, setting up docker-machine to remotly deploy works great
+docker build -f Dockerfile.arm32v6 -t trevorc2 .
+docker run -it -p 80:80 -p 443:443 trevorc2
+```
+
+On all others
+```bash
+git clone https://github.com/trustedsec/trevorc2.git
+cd trevorc2
 docker build -t trevorc2 . 
 docker run -it -p 80:80 -p 443:443 trevorc2
 ```
