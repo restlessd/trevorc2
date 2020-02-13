@@ -95,7 +95,6 @@ logging.basicConfig(level=logging.WARNING, format='[%(asctime)s] %(message)s', d
 log = logging.getLogger(__name__)
 
 __author__ = 'Dave Kennedy (@HackingDave)'
-__version__ = 0.7
 
 # ROOT CHECK
 if os.geteuid() != 0:
@@ -488,22 +487,21 @@ if __name__ == "__main__":
                         if (hostname_select < len(assets)) and (hostname_select > -1):
                             hostname = assets[hostname_select]['hostname']
                             sid = assets[hostname_select]['sessionid']
-                            print("\n*** interact with {} {}.".format(hostname, sid))
-                            print("[*] Dropping into trevorc2 shell...")
+                            print("\n*** Interacting with {} {}.".format(hostname, sid))
                             print("[*] Use exit or back to select other shells")
                             while 1:
                                 task = input(hostname + ":trevorc2>")
                                 if task is None or task == '': continue
                                 if task == "quit" or task == "exit" or task == "back": break
-                                task = (hostname + "::::" + task)
+                                task = hostname + "::::" + task
                                 set_instruction(sid, task)
                                 print(
-                                    "[*] Waiting for command to be executed, be patient, results will be displayed here...")
+                                    "[*] Command queued. Waiting for response.")
                                 while 1:
                                     # we received a hit with our command
                                     if os.path.isfile("clone_site/received_" + sid + ".txt"):
                                         data = open("clone_site/received_" + sid + ".txt", "r").read()
-                                        print("[*] Received response back from client...")
+                                        print("[*] Response received.")
                                         print(data)
                                         # remove this so we don't use it anymore
                                         os.remove("clone_site/received_" + sid + ".txt")
