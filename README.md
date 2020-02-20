@@ -154,7 +154,7 @@ Examples below:
 
 On raspberry pi 1, or pi running ARMv6
 ```bash
-git clone https://github.com/trustedsec/trevorc2.git
+git clone https://github.com/restlessd/trevorc2.git
 cd trevorc2
 docker build -f Dockerfile.arm32v6 -t trevorc2 .
 docker run -it -p 80:80 -p 443:443 trevorc2
@@ -162,7 +162,7 @@ docker run -it -p 80:80 -p 443:443 trevorc2
 
 On all others
 ```bash
-git clone https://github.com/trustedsec/trevorc2.git
+git clone https://github.com/restlessd/trevorc2.git
 cd trevorc2
 docker build -t trevorc2 . 
 docker run -it -p 80:80 -p 443:443 trevorc2
