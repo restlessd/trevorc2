@@ -1,0 +1,5 @@
+*.txt
+!requirements.txt
+*.md
+Dockerfile*
+trevorc2_client*
