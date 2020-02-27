@@ -504,6 +504,7 @@ if __name__ == "__main__":
                             print("\n*** Interacting with {} {}.".format(hostname, sid))
                             print("[*] Use exit or back to select other shells")
                             while 1:
+                                hostname = assets[hostname_select]['hostname']
                                 task = input(hostname + ":trevorc2>")
                                 if task is None or task == '': continue
                                 if task == "quit" or task == "exit" or task == "back": break
