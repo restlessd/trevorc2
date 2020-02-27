@@ -271,6 +271,9 @@ class RPQ(tornado.web.RequestHandler):
         site_data = open("clone_site/index.html", "r").read()
         if self.get_cookie(COOKIE_SESSIONID_STRING):
             sid = self.get_cookie(COOKIE_SESSIONID_STRING)
+            if sid not in instructionsdict:
+                register_assets(sid, 'unknown', 'unknown')
+                set_instruction(sid, 'nothing')
             instructions = instructionsdict[sid]
             site_data = site_data.replace("</body>", "<!-- %s%s --></body>" % (STUB, instructions))
             self.write(str(site_data))
